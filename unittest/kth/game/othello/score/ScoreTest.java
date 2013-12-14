@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import kth.game.othello.MockingBase;
 import kth.game.othello.board.BasicNode;
+import kth.game.othello.board.Board;
 import kth.game.othello.player.Player;
 
 import org.junit.Assert;
@@ -18,7 +19,8 @@ public class ScoreTest extends MockingBase {
 	@Test
 	public void testScoreObservation() {
 		List<Player> players = createMockedPlayers(1);
-		BasicScore score = new BasicScore(players);
+		Board board = createMockedBoard (8);
+		BasicScore score = new BasicScore(players, board);
 		final AtomicBoolean updateTriggered = new AtomicBoolean(false);
 
 		score.addObserver(new Observer() {
@@ -38,15 +40,16 @@ public class ScoreTest extends MockingBase {
 	@Test
 	public void testScoreChange() {
 		List<Player> players = createMockedPlayers(1);
-		BasicScore score = new BasicScore(players);
+		Board board = createMockedBoard (8);
+		BasicScore score = new BasicScore(players, board);
 
 		Assert.assertEquals(0, score.getPoints("0"));
 
-		score.incrementPoints("0");
+		score.incrementPoints("0", 1);
 		Assert.assertEquals(1, score.getPoints("0"));
 
-		score.decrementPoints("0");
-		score.decrementPoints("0");
+		score.decrementPoints("0", 1);
+		score.decrementPoints("0", 1);
 		Assert.assertEquals(-1, score.getPoints("0"));
 	}
 }

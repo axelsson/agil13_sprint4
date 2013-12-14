@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import kth.game.othello.Direction;
 import kth.game.othello.board.Board;
 import kth.game.othello.board.Node;
 import kth.game.othello.player.Player;
@@ -15,19 +16,21 @@ import kth.game.othello.player.Player;
 public class BasicScore extends Observable implements Score, Observer {
 
 	private final List<ScoreItem> playerScores = new ArrayList<>();
+	private final Board board;
 
-	public BasicScore(List<Player> players) {
+	public BasicScore(List<Player> players, Board board) {
 		for (Player player : players) {
 			playerScores.add(new ScoreItem(player.getId(), 0));
 		}
+		this.board = board;
 	}
 
-	void incrementPoints(String playerId) {
-		changePoints(playerId, 1);
+	void incrementPoints(String playerId, int amount) {
+		changePoints(playerId, 1*amount);
 	}
 
-	void decrementPoints(String playerId) {
-		changePoints(playerId, -1);
+	void decrementPoints(String playerId, int amount) {
+		changePoints(playerId, -1*amount);
 	}
 
 	private void changePoints(String playerId, int points) {
@@ -43,12 +46,24 @@ public class BasicScore extends Observable implements Score, Observer {
 	 * @param board
 	 *            The board to parse nodes from.
 	 */
-	public void setInitialScore(Board board) {
+	public void setInitialScore() {
 		for (Node node : board.getNodes()) {
 			if (node.getOccupantPlayerId() != null) {
-				incrementPoints(node.getOccupantPlayerId());
+				int amount = nodeOnBoundary (node) ? 2 : 1;
+				incrementPoints(node.getOccupantPlayerId(), amount);
 			}
 		}
+	}
+
+	private boolean nodeOnBoundary(Node node) {
+		for (Direction direction : Direction.values()){
+			if (!board.hasNode(
+					node.getXCoordinate() + direction.getXDirection(), 
+					node.getYCoordinate() + direction.getYDirection())){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -80,11 +95,12 @@ public class BasicScore extends Observable implements Score, Observer {
 			return;
 		Node node = (Node) o;
 		List<String> playerIds = new ArrayList<>();
-		incrementPoints(node.getOccupantPlayerId());
+		int amount = nodeOnBoundary (node) ? 2 : 1;
+		incrementPoints(node.getOccupantPlayerId(), amount);
 		playerIds.add(node.getOccupantPlayerId());
 		if (arg instanceof String) {
 			String previousPlayerId = (String) arg;
-			decrementPoints(previousPlayerId);
+			decrementPoints(previousPlayerId, amount);
 			playerIds.add(previousPlayerId);
 		}
 		setChanged();

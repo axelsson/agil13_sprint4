@@ -9,6 +9,7 @@ import java.util.List;
 import kth.game.othello.board.BasicBoardCreator;
 import kth.game.othello.board.BasicNodeCreator;
 import kth.game.othello.board.Board;
+import kth.game.othello.board.Node;
 import kth.game.othello.board.factory.BoardFactory;
 import kth.game.othello.player.ComputerPlayer;
 import kth.game.othello.player.Player;
@@ -94,19 +95,46 @@ public class OthelloLab2IT extends BaseTestCase {
 						new BoardFactory(new BasicNodeCreator(), new BasicBoardCreator()).getDiamondBoard(players, 13),
 						players);
 		othello.start(othello.getPlayers().get(0).getId());
+		int noValidMoveScorePenalties = 0;
 		for (int i = 0; othello.isActive(); i++) {
+			if (!othello.hasValidMove(othello.getPlayerInTurn().getId()))
+				noValidMoveScorePenalties -= 2;
 			othello.move();
 			if (i % 10 == 0) {
 				othello.getPlayers().get(0).setMoveStrategy(new FirstAvailableMoveStrategy());
 				othello.getPlayers().get(1).setMoveStrategy(new GreedyMoveStrategy());
 				othello.getPlayers().get(2).setMoveStrategy(new RandomMoveStrategy());
 			}
-			int numberOfOccupiedNodes = getNumberOfOccupiedNodes(othello);
+			int expectedScoreSum = getNumberOfOccupiedNodes(othello) + noValidMoveScorePenalties;
+			expectedScoreSum += getNumberOfOccupiedBoundaryNodes (othello.getBoard());
+			
 			int scoreSum = 0;
 			for (Player player : othello.getPlayers()) {
 				scoreSum += othello.getScore().getPoints(player.getId());
 			}
-			assertEquals(numberOfOccupiedNodes, scoreSum);
+			assertEquals(expectedScoreSum, scoreSum);
 		}
+	}
+	
+	private int getNumberOfOccupiedBoundaryNodes (Board board){
+		int boundaryNodes = 0;
+		for (Node node : board.getNodes()){
+			if (node.isMarked()){
+				if (isBoundary (board, node))
+					boundaryNodes++;
+			}
+		}
+		return boundaryNodes;
+	}
+	
+	private boolean isBoundary (Board board, Node node){
+		for (Direction direction : Direction.values()){
+			if (!board.hasNode(
+					node.getXCoordinate() + direction.getXDirection(), 
+					node.getYCoordinate() + direction.getYDirection())){
+				return true;
+			}
+		}
+		return false;
 	}
 }

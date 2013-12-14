@@ -28,7 +28,7 @@ class BasicOthello extends Observable implements Othello {
 	BasicOthello(Board board, List<Player> players) {
 		boardHandler = new BoardHandler(board);
 		playerHandler = new PlayerHandler(players);
-		score = new BasicScore(players);
+		score = new BasicScore(players, board);
 		rules = new BasicRules(boardHandler);
 		moveHandler = new MoveHandler(rules, playerHandler, boardHandler);
 		id = getNextId();
@@ -109,7 +109,7 @@ class BasicOthello extends Observable implements Othello {
 		for (Node node : getBoard().getNodes()) {
 			node.addObserver(score);
 		}
-		score.setInitialScore(getBoard());
+		score.setInitialScore();
 		playerHandler.setPlayerInTurn(playerId);
 	}
 
