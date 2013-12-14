@@ -23,6 +23,9 @@ public class OthelloLab2IT extends BaseTestCase {
 
 	private void makeNumberOfComputerMoves(int numberOfMoves, Othello othello) {
 		for (int i = 0; i < numberOfMoves; i++) {
+			if(othello.getPlayerInTurn() == null){
+				return;
+			}
 			assertEquals(Type.COMPUTER, othello.getPlayerInTurn().getType());
 			othello.move();
 		}
