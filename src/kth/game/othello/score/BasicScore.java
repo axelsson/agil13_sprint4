@@ -91,18 +91,26 @@ public class BasicScore extends Observable implements Score, Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (!(o instanceof Node))
-			return;
-		Node node = (Node) o;
 		List<String> playerIds = new ArrayList<>();
-		int amount = nodeOnBoundary (node) ? 2 : 1;
-		incrementPoints(node.getOccupantPlayerId(), amount);
-		playerIds.add(node.getOccupantPlayerId());
-		if (arg instanceof String) {
-			String previousPlayerId = (String) arg;
-			decrementPoints(previousPlayerId, amount);
-			playerIds.add(previousPlayerId);
+
+		if (o instanceof Node) {
+			Node node = (Node) o;
+			int amount = nodeOnBoundary (node) ? 2 : 1;
+			incrementPoints(node.getOccupantPlayerId(), amount);
+			playerIds.add(node.getOccupantPlayerId());
+			if (arg instanceof String) {
+				String previousPlayerId = (String) arg;
+				decrementPoints(previousPlayerId, amount);
+				playerIds.add(previousPlayerId);
+			}
+		} else if (arg instanceof Player) {
+			Player player = (Player) arg;
+			playerIds.add(player.getId());
+			changePoints(player.getId(), -2);
+		} else {
+			return;
 		}
+		
 		setChanged();
 		notifyObservers(playerIds);
 	}

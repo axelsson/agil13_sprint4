@@ -1,6 +1,7 @@
 package kth.game.othello;
 
 import java.util.List;
+import java.util.Observable;
 
 import kth.game.othello.board.Node;
 import kth.game.othello.player.Player;
@@ -9,7 +10,7 @@ import kth.game.othello.player.Player;
  * The responsibility of this entity is to perform logic which has to do with
  * performing moves.
  */
-class MoveHandler {
+class MoveHandler extends Observable {
 	private final PlayerHandler playerHandler;
 	private final BoardHandler boardHandler;
 	private final Rules rules;
@@ -31,8 +32,13 @@ class MoveHandler {
 	public Player getPlayerInTurn() {
 		Player initialPlayerInTurn = playerHandler.getPlayerInTurn();
 		while (!rules.hasValidMove(playerHandler.getPlayerInTurn().getId())) {
+			Player previousPlayer = playerHandler.getPlayerInTurn();
 			playerHandler.changePlayer();
 			boolean hasCheckedAllPlayers = playerHandler.getPlayerInTurn().equals(initialPlayerInTurn);
+			if (!hasCheckedAllPlayers && rules.hasValidMove(playerHandler.getPlayerInTurn().getId())) {
+				setChanged();
+				notifyObservers(previousPlayer);
+			}
 			if (hasCheckedAllPlayers) {
 				return null;
 			}

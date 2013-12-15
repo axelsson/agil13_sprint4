@@ -31,6 +31,7 @@ class BasicOthello extends Observable implements Othello {
 		score = new BasicScore(players, board);
 		rules = new BasicRules(boardHandler);
 		moveHandler = new MoveHandler(rules, playerHandler, boardHandler);
+		moveHandler.addObserver(score);
 		id = getNextId();
 	}
 
