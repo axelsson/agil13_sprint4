@@ -1,5 +1,6 @@
 package kth.game.othello;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
@@ -31,17 +32,19 @@ class MoveHandler extends Observable {
 	 */
 	public Player getPlayerInTurn() {
 		Player initialPlayerInTurn = playerHandler.getPlayerInTurn();
+		List<Player> hasNoValidMoves = new ArrayList<Player>();
 		while (!rules.hasValidMove(playerHandler.getPlayerInTurn().getId())) {
-			Player previousPlayer = playerHandler.getPlayerInTurn();
+			hasNoValidMoves.add(playerHandler.getPlayerInTurn());
 			playerHandler.changePlayer();
 			boolean hasCheckedAllPlayers = playerHandler.getPlayerInTurn().equals(initialPlayerInTurn);
-			if (!hasCheckedAllPlayers && rules.hasValidMove(playerHandler.getPlayerInTurn().getId())) {
-				setChanged();
-				notifyObservers(previousPlayer);
-			}
+			
 			if (hasCheckedAllPlayers) {
 				return null;
 			}
+		}
+		for (Player p : hasNoValidMoves) {
+			setChanged();
+			notifyObservers(p);
 		}
 		return playerHandler.getPlayerInTurn();
 	}
